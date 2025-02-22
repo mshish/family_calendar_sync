@@ -307,6 +307,10 @@ class Calendar:
         if cal:
             # TODO: fix case where caldav entities report an ongoing event in get events
             # but local calendar entities do not.
+            # TODO fix case where an event created within HA where the target is a 
+            # google calendar (with read/write permissions), the get_events code
+            # below will not fetch the newly created event. But the calendar service
+            # call within HA UI will return the event.
             events_data = await cal.async_get_events(
                 self._hass,
                 self._sync_date_range.start,

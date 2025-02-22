@@ -75,7 +75,7 @@ CONFIG_SCHEMA = vol.Schema(
 #     return True
 
 
-async def async_setup(hass: HomeAssistant, config: dict):
+async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     """Set up the Family Calendar Sync integration."""
 
     domain_config = config.get("family_calendar_sync")
