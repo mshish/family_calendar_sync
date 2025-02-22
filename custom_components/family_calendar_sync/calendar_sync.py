@@ -1,6 +1,6 @@
 """Module to handle syncing between the local calendar and CalDAV calendar."""
 
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 import datetime
 from datetime import datetime, timedelta
 from hashlib import sha256
@@ -9,6 +9,7 @@ import re
 
 from homeassistant.components.calendar import CalendarEntity
 from homeassistant.core import HomeAssistant
+from homeassistant.util import dt as dt_util
 
 from .const import DEFAULT_DAYS_TO_SYNC, HASH_LENGTH
 
@@ -27,7 +28,8 @@ class SyncDateRange:
     @property
     def end(self) -> datetime:
         """Return the end datetime."""
-        return self.start + timedelta(days=self.days_to_sync)
+        end_datetime = self.start + timedelta(days=self.days_to_sync)
+        return dt_util.as_local(end_datetime)
 
 
 class Event:
@@ -305,9 +307,7 @@ class Calendar:
         """Get events using hass object and load into calendar object."""
         cal = self._hass.data.get("calendar").get_entity(self.entity_id)
         if cal:
-            # TODO: fix case where caldav entities report an ongoing event in get events
-            # but local calendar entities do not.
-            # TODO fix case where an event created within HA where the target is a 
+            # TODO fix case where an event created within HA where the target is a
             # google calendar (with read/write permissions), the get_events code
             # below will not fetch the newly created event. But the calendar service
             # call within HA UI will return the event.
@@ -316,6 +316,7 @@ class Calendar:
                 self._sync_date_range.start,
                 self._sync_date_range.end,
             )
+
             for event_data in events_data:
                 event = None
                 if self.type == "parent":
@@ -334,7 +335,7 @@ class Calendar:
             # not all events will have hashes
             # ex: events created manually in local cal
             if (hashed_value := event.hashed_value) is not None:
-                self.hash_map[hashed_value] = event
+                self._hash_map[hashed_value] = event
 
     def get_event_with_hash(self, hashed_value: str) -> Event | None:
         """Get the Event with the corresponding hash, if any."""
@@ -480,7 +481,7 @@ class SyncWorker:
             self._ignore_event_if_title_starts_with = None
 
         self._sync_date_range = SyncDateRange(
-            start=datetime.now().astimezone(),
+            start=dt_util.as_local(datetime.now()),
             days_to_sync=days_to_sync,
         )
 
