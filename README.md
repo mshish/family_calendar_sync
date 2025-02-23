@@ -12,7 +12,9 @@ The idea is to read from one or more `parent` calendar entities then copy the ev
 
 ## Install
 
-Use HACS to install this component.
+This component is installed via [HACS](https://hacs.xyz).
+
+Once HACS is installed in your Home Assistant instance, you can find this repo by searching for "family calendar sync" and downloading it.
 
 ### Configuration
 
