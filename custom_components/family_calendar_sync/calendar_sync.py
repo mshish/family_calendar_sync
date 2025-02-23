@@ -307,10 +307,6 @@ class Calendar:
         """Get events using hass object and load into calendar object."""
         cal = self._hass.data.get("calendar").get_entity(self.entity_id)
         if cal:
-            # TODO fix case where an event created within HA where the target is a
-            # google calendar (with read/write permissions), the get_events code
-            # below will not fetch the newly created event. But the calendar service
-            # call within HA UI will return the event.
             events_data = await cal.async_get_events(
                 self._hass,
                 self._sync_date_range.start,
@@ -365,13 +361,19 @@ class ParentCalendar(Calendar):
         )
         self._ignore_string = ignore_string
 
+    @property
+    def ignore_string(self) -> str | None:
+        """Return ignore_string."""
+        return self._ignore_string
+
     def remove_events_to_ignore(self) -> None:
         """Remove events whose title starts with the string we are to ignore."""
-        self.events = [
-            event
-            for event in self.events
-            if not event.title.startswith(self._ignore_string)
-        ]
+        if self.ignore_string:
+            self.events = [
+                event
+                for event in self.events
+                if not event.title.startswith(self._ignore_string)
+            ]
 
 
 class ChildCalendar(Calendar):
@@ -580,12 +582,8 @@ class SyncWorker:
         parentset = self._set_of_hashes_by_cal_type("parent")
         childset = self._set_of_hashes_by_cal_type("child")
         need_removed = childset - parentset
-        # need_added = parentset - childset
         # TODO: Need to reparse all events in case config has changed.
         # Can a previous config be saved to do a diff against?
-        # TODO: getting events that already started are not returned
-        # Need to figure out how to get events that are already started or
-        # they get duplicated on the child calendar.
         await self._async_remove_events_from_child_cals(need_removed)
         for parent_cal in self.calendars["parent"]:
             for child_cal in self.calendars["child"]:

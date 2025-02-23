@@ -59,22 +59,6 @@ CONFIG_SCHEMA = vol.Schema(
     extra=vol.ALLOW_EXTRA,
 )
 
-
-# async def async_setup(hass: HomeAssistant, config: dict):
-#     domain_config = config.get("family_calendar_sync")
-#     if domain_config is None:
-#         _LOGGER.warning("No config data found for family_calendar_sync service")
-#         return True
-#     await sync_family_calendar(
-#         hass=hass,
-#         config=domain_config,
-#     )
-#     hass.services.async_register(
-#         DOMAIN, SERVICE_SYNC, sync_family_calendar, schema=vol.Schema({})
-#     )
-#     return True
-
-
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     """Set up the Family Calendar Sync integration."""
 
