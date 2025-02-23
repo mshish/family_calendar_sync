@@ -53,7 +53,7 @@ This component is configured using your `configuration.yaml` file. It has three 
                     - **Description**: The unique identifier of the parent calendar.
         - `keywords`:
             - **Type**: List of Strings
-            - **Description**: A list of keywords used as a case insensitive search filter against the title's of `parent` events.
+            - **Description**: A list of keywords used as a case-insensitive search filter against the title's of `parent` events.
 
 ### Example `configuration.yaml`
 
@@ -121,15 +121,31 @@ Here is what the synced calendar looks like:
 
 There's a `family_calendar_sync` service. This is what you would use in an automation to have them stay in sync. In the automation, you can specify how frequently the sync occurs.
 
+#### Example Automation
+
+This can be setup using the visual editor, but here is the yaml for an automation that runs every 15 minutes:
+
+```yaml
+description: "Run family calendar sync"
+mode: single
+triggers:
+  - trigger: time_pattern
+    minutes: /15
+actions:
+  - action: family_calendar_sync.family_calendar_sync
+    metadata: {}
+    data: {}
+```
+
 ## Background
 
-I saw the Skylight calendar and thought it looked cool. But I didn't like that I'd have to use their app to attach the events to a child's calendars. My parenter and I already have a good system in place that we like. I built this tool to automate it so our kids can see their events.
+I saw the Skylight calendar and thought it looked cool. But I didn't like that I'd have to use their app to attach the events to a child's calendars. My partner and I already have a good system in place that we like. I built this tool to automate it, so our kids can see their events.
 
 ### Our Process
 
 I have an iCloud calendar and I Share it with my partner. My partner also has an iCloud calendar and Shares it with me. This is useful because if my partner adds an event titled "Dentist," I know it's for them. This came in handy when designing this component too because I can just say copy all of the events from my shared calendar to my local calendar named dad (see the example config for the `copy_all_from` config option). 
 
-When my partner or I create events for the kids we have to put their name in the event or we will be forever lost. Thus, I built this component to extract keywords---such as their name, "kids," and "family"---and copy those events to their calendars.
+When my partner or I create events for the kids we have to put their name in the event or we will be forever lost. Thus, I built this component to extract keywords and copy those events to their calendars.
 
 ## TODO
 
@@ -137,5 +153,5 @@ When my partner or I create events for the kids we have to put their name in the
 - [ ] Add check if child calendar is CalDAV and raise error because Home Assistant cannot create events on CalDAV entity.
 - [ ] See if we can run sync on any event change within the time period being synced (default 7 days).
 - [ ] Test if keywords work with multiple word strings
-- [ ] Create option to allow keywords to be case sensitive match
+- [ ] Create option to allow keywords to be case-sensitive match
 
