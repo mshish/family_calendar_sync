@@ -193,7 +193,7 @@ class ChildEvent(Event):
         """Extract the hashed_value from the event description field. None, if not found."""
         hashed_value = None
         if description := self.description:
-            if match := HASH_REGEX.match(description):
+            if match := HASH_REGEX.search(description):
                 hashed_value = match.group(1)
         self._hashed_value = hashed_value
 
