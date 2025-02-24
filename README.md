@@ -4,11 +4,34 @@
 
 The idea is to read from one or more `parent` calendar entities then copy the events to one or more `child` calendar entities. All of the events can be copied. Or just those that match a simple list of keywords, such as a name. It keeps them in sync by computing a hash of the `parent` calendar events and storing the first 8 characters of the hash in the description of the event on the `child` calendar.
 
+**Which Calendar Integrations Work?**
+
+- CalDAV:
+    - Only works as `parent` because the integration doesn't have the ability to create an event.
+- Google Calendar:
+    - Works as both `parent` and `child` if it's set up with two-way sync permissions.
+- Local Calendar:
+    - Works as both `parent` and `child`.
+
+## Background
+
+I saw the Skylight calendar and thought it looked cool. But I didn't like that I'd have to use their app to attach the events to a child's calendars. My partner and I already have a good system in place that we like. I built this tool to automate it, so our kids can see their events.
+
+### Our Family's Process
+
+I have an iCloud calendar and I Share it with my partner. My partner also has an iCloud calendar and Shares it with me. This is useful because if my partner adds an event titled "Dentist," I know it's for them. This came in handy when designing this component too because I can just say copy all of the events from my shared calendar to my local calendar named dad (see the example config for the `copy_all_from` config option). 
+
+When my partner or I create events for the kids we put their name in the event. I built this component to look for keywords (e.g. their name) and copy those events to their calendars. I put a couple examples in the Example Configuration section below.
+
 ## Features
 
+- Works for CalDAV (iCloud), Google Calendar, and Local Calendar entities
 - Copy events from one calendar to another and keep them in sync (by using an automation)
-- Will delete events from `child` calendars
 - If an event is added to a `child` calendar, it will not be harmed by this service
+- Specify how many days in the future to sync
+- Ignore all events that start with a character you specify
+- `child` calendars can have many keywords to match against (e.g. their name, "family", "kids", etc.)
+- Only deletes a `child` event if Family Calendar Sync service created it **and** the event details no longer match the `parent`s event.
 
 ## Install
 
@@ -65,10 +88,7 @@ Let's say we have the following family structure:
   - Snoop (child)
   - Scott Pilgrim (child)
   - Cupid (child)
-  - Mom (child)_+_
-  - Dad (child)_+_
 
-_\+ We also created a Local Calendar entity for mom and dad, because the kids like to see what mom and dad have going on in their day too._
 
 Here's the example `configuration.yaml`:
 
@@ -81,6 +101,8 @@ family_calendar_sync:
     - entity_id: calendar.napoleon_dynamite
     - entity_id: calendar.nomi_malone
   child:
+    # We also created a Local Calendar entity for mom and dad, because the
+    # kids like to see what mom and dad have going on in their day too.
     - entity_id: calendar.dad
       copy_all_from:
         entity_id: calendar.napoleon_dynamite
@@ -121,7 +143,7 @@ Here is what the synced calendar looks like:
 
 ### Service
 
-There's a `family_calendar_sync` service. This is what you would use in an automation to have them stay in sync. In the automation, you can specify how frequently the sync occurs.
+The component creates a `family_calendar_sync` service. This is what you would use in an automation to have them stay in sync. In the automation, you can specify how frequently the sync occurs.
 
 #### Example Automation
 
@@ -139,16 +161,6 @@ actions:
     data: {}
 ```
 
-## Background
-
-I saw the Skylight calendar and thought it looked cool. But I didn't like that I'd have to use their app to attach the events to a child's calendars. My partner and I already have a good system in place that we like. I built this tool to automate it, so our kids can see their events.
-
-### Our Process
-
-I have an iCloud calendar and I Share it with my partner. My partner also has an iCloud calendar and Shares it with me. This is useful because if my partner adds an event titled "Dentist," I know it's for them. This came in handy when designing this component too because I can just say copy all of the events from my shared calendar to my local calendar named dad (see the example config for the `copy_all_from` config option). 
-
-When my partner or I create events for the kids we have to put their name in the event or we will be forever lost. Thus, I built this component to extract keywords and copy those events to their calendars.
-
 ## TODO
 
 - [ ] Create tests for everything
@@ -156,4 +168,6 @@ When my partner or I create events for the kids we have to put their name in the
 - [ ] See if we can run sync on any event change within the time period being synced (default 7 days).
 - [ ] Test if keywords work with multiple word strings
 - [ ] Create option to allow keywords to be case-sensitive match
+- [ ] Add todo lists
+- [ ] Error handle if a CalDAV or Google Calendar (without two way permissions) entity is used as a `child`
 
