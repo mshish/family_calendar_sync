@@ -35,9 +35,23 @@ When my partner or I create events for the kids we put their name in the event. 
 
 ## Install
 
-This component is installed via [HACS](https://hacs.xyz).
+This component is installed via [HACS](https://hacs.xyz). 
 
-Once HACS is installed in your Home Assistant instance, you can find this repo by searching for "family calendar sync" and downloading it.
+### Method 1
+
+1. Install HACS first
+1. Click this button [![Open in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=mccroden&repository=family_calendar_sync&category=integration)
+1. Click **Download** in the lower-right corner. Or, in the upper-right, click **⁝** > **Download**
+1. Restart Home Assistant
+
+### Method 2
+1. Install HACS first
+1. Go to **HACS** > **⁝** > **Custom repositories** 
+1. Add `McCroden/family_calendar_sync` and choose **Integration** then click **ADD**
+1. Go back to the main HACS landing page and search `family calendar sync`
+1. Click on it
+1. Click **Download** in the lower-right corner. If the Download button isn't there: in the upper-right, click **⁝** > **Download**
+1. Restart Home Assistant
 
 ### Configuration
 
