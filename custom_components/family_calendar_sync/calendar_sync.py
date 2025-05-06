@@ -88,6 +88,8 @@ class Event:
         )
         if self.location is not None:
             data["location"] = self.location
+        if self.rrule is not None:
+            data["rrule"] = self.rrule
         return data
 
     @property
@@ -234,6 +236,10 @@ class ParentEvent(Event):
 
         if location := self.location:
             event_data["location"] = location
+            
+        if self.rrule is not None:
+            event_data["rrule"] = self.rrule
+            
         return event_data
 
 
@@ -394,8 +400,11 @@ class ChildCalendar(Calendar):
             cal_type="child",
         )
         self._keywords = keywords
-        reg_string = r"\b(" + f"{'|'.join(keywords)}" + r")\b"
-        self._regex_pattern = re.compile(reg_string, re.IGNORECASE | re.MULTILINE)
+        if keywords:
+            reg_string = r"\b(" + f"{'|'.join(keywords)}" + r")\b"
+            self._regex_pattern = re.compile(reg_string, re.IGNORECASE | re.MULTILINE)
+        else:
+            self._regex_pattern = None
 
     @property
     def keywords(self) -> list[str]:
@@ -404,6 +413,8 @@ class ChildCalendar(Calendar):
 
     def is_a_keyword_match(self, title: str) -> bool:
         """Determine if a keyword is found in `title`."""
+        if not self._keywords or self._regex_pattern is None:
+            return False
         return bool(self._regex_pattern.search(title))
 
     async def _async_delete_event_from_ha(self, hashed_value: str):
@@ -585,9 +596,18 @@ class SyncWorker:
         # TODO: Need to reparse all events in case config has changed.
         # Can a previous config be saved to do a diff against?
         await self._async_remove_events_from_child_cals(need_removed)
-        for parent_cal in self.calendars["parent"]:
-            for child_cal in self.calendars["child"]:
-                await self._async_sync_parent_to_child(parent_cal, child_cal)
+        
+        # Only sync parent calendars with their designated child calendars
+        for child_cal in self.calendars["child"]:
+            # Get the parent entity_id this child should copy all from
+            parent_entity_id = self._copy_all_map.get(child_cal.entity_id)
+            
+            for parent_cal in self.calendars["parent"]:
+                # Only sync if:
+                # 1. This parent is designated as copy_all for this child, OR
+                # 2. The child has keywords that might match events in this parent
+                if (parent_entity_id == parent_cal.entity_id) or child_cal.keywords:
+                    await self._async_sync_parent_to_child(parent_cal, child_cal)
 
 
 async def sync_family_calendar(hass: HomeAssistant, config: dict):
