@@ -88,8 +88,6 @@ class Event:
         )
         if self.location is not None:
             data["location"] = self.location
-        if self.rrule is not None:
-            data["rrule"] = self.rrule
         return data
 
     @property
@@ -236,10 +234,7 @@ class ParentEvent(Event):
 
         if location := self.location:
             event_data["location"] = location
-            
-        if self.rrule is not None:
-            event_data["rrule"] = self.rrule
-            
+     
         return event_data
 
 
